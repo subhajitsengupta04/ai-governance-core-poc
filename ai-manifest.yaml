@@ -1,0 +1,18 @@
+schema_version: '1.0'
+system_name: ai-pr-sanity-test
+owner_team: "@ericsson-security-gov"
+risk_tier: tier-3-customer-facing
+model_supply_chain:
+  provider: openai
+  model_id: gpt-4o
+  fine_tuned: false
+data_governance:
+  max_data_classification: restricted-pii
+  rag_sources:
+  - internal-knowledge-base
+  external_data_egress: true
+safety_and_controls:
+  human_in_the_loop: required-before-action
+  fallback_behavior: graceful-error-message
+  prompt_injection_guard: system-delimiter-check
+  last_eval_commit: c35ea26
