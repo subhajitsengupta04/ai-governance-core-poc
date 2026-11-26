@@ -1,10 +1,6 @@
 schema_version: '1.0'
 system_name: ai-pr-sanity-test
-owner_team: "@ericsson-security\e[D\e[D\e[D\e[D\e[D\e[D\e[D\e[D-\e[Dcod\e[B\e[F\e\
-  [C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e\
-  [C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e\
-  [C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[B\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e[C\e\
-  [-gov"
+owner_team: "@ericsson-security-gov"
 risk_tier: tier-3-customer-facing
 model_supply_chain:
   provider: openai
