@@ -1,7 +1,14 @@
 import subprocess
 from pathlib import Path
 import yaml
+import re
 
+
+ANSI_ESCAPE = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+
+def clean_input(prompt: str) -> str:
+    raw = input(prompt)
+    return ANSI_ESCAPE.sub("", raw).strip()
 
 def prompt_choice(question: str, options: list[str]) -> str:
     print(f"\n{question}")
