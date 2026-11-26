@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI Nutrition Label Manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "system_name",
+    "owner_team",
+    "risk_tier",
+    "model_supply_chain",
+    "data_governance",
+    "safety_and_controls"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "system_name": { "type": "string", "minLength": 3 },
+    "owner_team": { "type": "string", "pattern": "^@[a-zA-Z0-9_-]+$" },
+    "risk_tier": {
+      "type": "string",
+      "enum": [
+        "tier-1-sandbox",
+        "tier-2-internal-assist",
+        "tier-3-customer-facing",
+        "tier-4-autonomous-action"
+      ]
+    },
+    "model_supply_chain": {
+      "type": "object",
+      "required": ["provider", "model_id", "fine_tuned"],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": ["azure-openai", "aws-bedrock", "local-ollama", "huggingface", "openai", "anthropic"]
+        },
+        "model_id": { "type": "string", "minLength": 2 },
+        "fine_tuned": { "type": "boolean" }
+      }
+    },
+    "data_governance": {
+      "type": "object",
+      "required": ["max_data_classification", "rag_sources", "external_data_egress"],
+      "properties": {
+        "max_data_classification": {
+          "type": "string",
+          "enum": ["public", "internal", "confidential", "restricted-pii"]
+        },
+        "rag_sources": { "type": "array", "items": { "type": "string" } },
+        "external_data_egress": { "type": "boolean" }
+      }
+    },
+    "safety_and_controls": {
+      "type": "object",
+      "required": ["human_in_the_loop", "fallback_behavior", "prompt_injection_guard", "last_eval_commit"],
+      "properties": {
+        "human_in_the_loop": {
+          "type": "string",
+          "enum": ["none", "async-audit", "required-before-action"]
+        },
+        "fallback_behavior": { "type": "string", "minLength": 3 },
+        "prompt_injection_guard": { "type": "string", "minLength": 3 },
+        "last_eval_commit": { "type": "string", "pattern": "^[a-fA-F0-9]{7,40}$" }
+      }
+    }
+  }
+}

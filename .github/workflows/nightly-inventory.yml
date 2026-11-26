@@ -1,0 +1,61 @@
+name: Nightly AI Inventory Aggregator
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Compile AI-INVENTORY.md
+        run: |
+          python - << 'EOF'
+          import datetime
+          from pathlib import Path
+          import yaml
+
+          manifests = list(Path(".").rglob("ai-manifest.yaml"))
+          lines = [
+              "# Enterprise AI System Inventory",
+              f"_Last updated: {datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}_\n",
+              "| System Name | Owner | Risk Tier | Provider / Model | Data Classification | HITL Control |",
+              "| :--- | :--- | :--- | :--- | :--- | :--- |"
+          ]
+
+          for m_path in manifests:
+              data = yaml.safe_load(m_path.read_text(encoding="utf-8"))
+              lines.append(
+                  f"| `{data['system_name']}` | `{data['owner_team']}` | `{data['risk_tier']}` | "
+                  f"`{data['model_supply_chain']['provider']}/{data['model_supply_chain']['model_id']}` | "
+                  f"`{data['data_governance']['max_data_classification']}` | `{data['safety_and_controls']['human_in_the_loop']}` |"
+              )
+
+          if not manifests:
+              lines.append("| _No manifests found_ | - | - | - | - | - |")
+
+          Path("AI-INVENTORY.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+          EOF
+
+      - name: Commit updated inventory
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add AI-INVENTORY.md
+          git diff --cached --quiet || git commit -m "chore: update nightly AI inventory"
+          git push
