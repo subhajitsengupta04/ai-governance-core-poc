@@ -18,7 +18,7 @@ AI_KEYWORDS = (
     "llama_index",
 )
 MANIFEST_PATH = Path("ai-manifest.yaml")
-SCHEMA_PATH = Path("governance/ai-manifest.schema.json")
+SCHEMA_PATH = Path("/governance/ai-manifest.schema.json")
 COMMENT_OUTPUT = Path("pr_comment.md")
 
 # 1. Hardcoded AI & Cloud API Key Patterns
@@ -80,8 +80,6 @@ def scan_diff_security_and_egress(added_lines: list[tuple[str, str]]) -> tuple[l
     external_url_hits = []
 
     for file_path, content in added_lines:
-        if file_path == "governance/validate_pr.py":
-            continue
         for label, pattern in SECRET_PATTERNS.items():
             if pattern.search(content):
                 secret_hits.append(f"**{label}** detected in `{file_path}`")
@@ -139,17 +137,18 @@ def _detect_infinite_llm_loops(tree: ast.AST, py_file: Path) -> list[str]:
 
 
 def inspect_python_ast(manifest_data: dict) -> list[str]:
-    """Parses Python files in src/ to catch provider lies, unbounded LLM calls, and infinite loops."""
+    """Parses Python files across the workspace to catch provider lies, unbounded calls, and infinite loops."""
     violations = []
     declared_provider = manifest_data["model_supply_chain"]["provider"]
     detected_providers = set()
     llm_calls_without_limits = []
 
-    src_dir = Path("src")
-    if not src_dir.exists():
-        return violations
+    py_files = [
+        p for p in Path(".").rglob("*.py")
+        if not any(part.startswith(".") or part in ("venv", "__pycache__") for part in p.parts)
+    ]
 
-    for py_file in src_dir.rglob("*.py"):
+    for py_file in py_files:
         try:
             tree = ast.parse(py_file.read_text(encoding="utf-8"))
         except SyntaxError:
@@ -238,8 +237,7 @@ def main() -> int:
         f == str(MANIFEST_PATH) or f.startswith("prompts/") for f in changed_files
     ) or any(
         any(kw in content.lower() for kw in AI_KEYWORDS)
-        for fp, content in added_lines
-        if fp != "governance/validate_pr.py"
+        for _, content in added_lines
     )
     prompts_touched = any(f.startswith("prompts/") for f in changed_files)
 
